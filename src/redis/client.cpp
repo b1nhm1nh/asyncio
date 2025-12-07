@@ -438,7 +438,9 @@ task::Task<std::int64_t, std::error_code> Client::commandInt(std::vector<std::st
 // ==================== String Commands ====================
 
 task::Task<OptionalString, std::error_code> Client::get(std::string_view key) {
-    auto result = co_await mImpl->executeCommand({"GET", std::string(key)});
+    // GCC 15 ICE workaround: explicit vector instead of brace-init
+    std::vector<std::string> args{"GET", std::string(key)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToString(*result);
 }
@@ -478,12 +480,13 @@ task::Task<void, std::error_code> Client::setex(
     std::chrono::seconds ttl,
     std::string_view value
 ) {
-    auto result = co_await mImpl->executeCommand({
+    std::vector<std::string> args{
         "SETEX",
         std::string(key),
         std::to_string(ttl.count()),
         std::string(value)
-    });
+    };
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return {};
 }
