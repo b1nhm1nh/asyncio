@@ -26,6 +26,10 @@ add_executable(
         sync/mutex.cpp
         sync/event.cpp
         sync/condition.cpp
+        net/lowlatency/udp.cpp
+        $<$<NOT:$<PLATFORM_ID:Windows>>:net/lowlatency/shm.cpp>
+        # KCP tests require ikcp library - uncomment when kcp is available
+        # net/lowlatency/kcp.cpp
         $<$<NOT:$<PLATFORM_ID:Windows>>:signal.cpp>
 )
 

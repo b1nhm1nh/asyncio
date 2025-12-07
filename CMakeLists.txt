@@ -133,3 +133,9 @@ endif ()
 if (BUILD_TESTING)
     add_subdirectory(test)
 endif ()
+
+option(BUILD_BENCHMARKS "Build asyncio benchmarks" OFF)
+
+if (BUILD_BENCHMARKS)
+    add_subdirectory(benchmark)
+endif ()
