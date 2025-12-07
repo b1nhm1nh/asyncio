@@ -10,10 +10,30 @@
 #include <openssl/sha.h>
 #include <random>
 #include <map>
+#include <algorithm>
+#include <cctype>
 
 #ifdef __ANDROID__
 #include <endian.h>
 #endif
+
+namespace {
+    // Case-insensitive string comparison for HTTP headers
+    struct CaseInsensitiveLess {
+        bool operator()(const std::string& a, const std::string& b) const {
+            return std::lexicographical_compare(
+                a.begin(), a.end(),
+                b.begin(), b.end(),
+                [](char c1, char c2) {
+                    return std::tolower(static_cast<unsigned char>(c1)) <
+                           std::tolower(static_cast<unsigned char>(c2));
+                }
+            );
+        }
+    };
+
+    using CaseInsensitiveMap = std::map<std::string, std::string, CaseInsensitiveLess>;
+}
 
 constexpr auto SWITCHING_PROTOCOLS_STATUS = 101;
 constexpr auto MASKING_KEY_LENGTH = 4;
@@ -43,7 +63,7 @@ DEFINE_ERROR_CATEGORY_INSTANCE(ZLIBError)
 
 namespace {
     std::expected<void, std::error_code>
-    validateWebsocketAccept(const std::map<std::string, std::string> &headers, const std::string &key) {
+    validateWebsocketAccept(const CaseInsensitiveMap &headers, const std::string &key) {
         const auto it = headers.find("Sec-WebSocket-Accept");
 
         if (it == headers.end())
@@ -65,14 +85,25 @@ namespace {
     }
 
     std::expected<std::optional<asyncio::http::ws::DeflateConfig>, std::error_code>
-    parseExtensionConfig(const std::map<std::string, std::string> &headers) {
+    parseExtensionConfig(const CaseInsensitiveMap &headers) {
         const auto it = headers.find("Sec-WebSocket-Extensions");
 
         if (it == headers.end())
             return std::nullopt;
 
-        const auto items = zero::strings::split(it->second, ';')
+        // Split by ';' and trim both whitespace and any stray semicolons
+        auto items = zero::strings::split(it->second, ';')
             | std::views::transform(zero::strings::trim)
+            | std::views::transform([](std::string_view s) {
+                // Remove trailing semicolons
+                while (!s.empty() && s.back() == ';')
+                    s.remove_suffix(1);
+                // Remove leading semicolons
+                while (!s.empty() && s.front() == ';')
+                    s.remove_prefix(1);
+                return std::string(s);
+              })
+            | std::views::filter([](const std::string& s) { return !s.empty(); })
             | std::ranges::to<std::vector>();
 
         if (std::ranges::find(items, "permessage-deflate") == items.end())
@@ -376,7 +407,7 @@ asyncio::task::Task<asyncio::http::ws::WebSocket, std::error_code> asyncio::http
             co_return std::unexpected{Error::UNEXPECTED_STATUS_CODE};
     }
 
-    std::map<std::string, std::string> headers;
+    CaseInsensitiveMap headers;
 
     while (true) {
         const auto line = co_await bufReader.readLine();
