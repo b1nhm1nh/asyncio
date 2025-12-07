@@ -16,6 +16,24 @@ target_link_libraries(asyncio_http PRIVATE asyncio-main)
 add_executable(asyncio_ws ws/main.cpp)
 target_link_libraries(asyncio_ws PRIVATE asyncio-main)
 
+add_executable(asyncio_mqtt mqtt/main.cpp)
+target_link_libraries(asyncio_mqtt PRIVATE asyncio-main)
+
+add_executable(asyncio_candle candle/main.cpp)
+target_link_libraries(asyncio_candle PRIVATE asyncio-main)
+
+add_executable(asyncio_redis redis/main.cpp)
+target_link_libraries(asyncio_redis PRIVATE asyncio-main)
+
+add_executable(asyncio_memcached memcached/main.cpp)
+target_link_libraries(asyncio_memcached PRIVATE asyncio-main)
+
+add_executable(asyncio_perf_test perf_test/main.cpp)
+target_link_libraries(asyncio_perf_test PRIVATE asyncio-main)
+
+add_executable(asyncio_memory_test perf_test/memory_test.cpp)
+target_link_libraries(asyncio_memory_test PRIVATE asyncio-main)
+
 # Low-latency samples (header-only, no asyncio-main needed for simple tests)
 add_executable(asyncio_udp_echo udp/echo.cpp)
 target_link_libraries(asyncio_udp_echo PRIVATE asyncio)

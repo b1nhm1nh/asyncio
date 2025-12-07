@@ -53,3 +53,18 @@ target_link_libraries(
         Drogon::Drogon
         benchmark::benchmark
 )
+
+# Redis/Memcached Benchmarks
+add_executable(
+        bench_cache
+        redis_bench.cpp
+        memcached_bench.cpp
+        cache_bench_main.cpp
+)
+
+target_link_libraries(
+        bench_cache
+        PRIVATE
+        asyncio
+        benchmark::benchmark
+)

@@ -4,6 +4,10 @@
   "builtin-baseline": "6b3172d1a7be062b3d0278369aac9a0258cefc65",
   "dependencies": [
     "curl",
+    {
+      "name": "hiredis",
+      "features": ["ssl"]
+    },
     "libuv",
     "nlohmann-json",
     "openssl",

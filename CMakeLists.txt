@@ -22,6 +22,7 @@ find_package(zero CONFIG REQUIRED)
 find_package(CURL CONFIG REQUIRED)
 find_package(libuv CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
+find_package(hiredis CONFIG REQUIRED)
 
 add_library(
         asyncio
@@ -47,6 +48,11 @@ add_library(
         src/http/url.cpp
         src/http/request.cpp
         src/http/websocket.cpp
+        src/mqtt/client.cpp
+        src/mqtt/protocol.cpp
+        src/memcached/client.cpp
+        src/memcached/protocol.cpp
+        src/redis/client.cpp
         src/sync/mutex.cpp
         src/sync/event.cpp
         src/sync/condition.cpp
@@ -75,6 +81,7 @@ target_link_libraries(
         CURL::libcurl
         nlohmann_json::nlohmann_json
         $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
+        $<IF:$<TARGET_EXISTS:hiredis::hiredis>,hiredis::hiredis,hiredis::hiredis_static>
 )
 
 add_library(asyncio-main STATIC src/main.cpp)

@@ -23,11 +23,17 @@ add_executable(
         http/url.cpp
         http/request.cpp
         http/websocket.cpp
+        mqtt/client.cpp
+        mqtt/protocol.cpp
+        mqtt/integration.cpp
+        memcached/protocol.cpp
+        memcached/integration.cpp
+        redis/integration.cpp
         sync/mutex.cpp
         sync/event.cpp
         sync/condition.cpp
         net/lowlatency/udp.cpp
-        $<$<NOT:$<PLATFORM_ID:Windows>>:net/lowlatency/shm.cpp>
+        # $<$<NOT:$<PLATFORM_ID:Windows>>:net/lowlatency/shm.cpp>  # Temporarily disabled - Approx issue
         # KCP tests require ikcp library - uncomment when kcp is available
         # net/lowlatency/kcp.cpp
         $<$<NOT:$<PLATFORM_ID:Windows>>:signal.cpp>
