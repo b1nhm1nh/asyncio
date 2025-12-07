@@ -333,9 +333,11 @@ public:
         if (mConnected && mClient) {
             auto countResult = co_await mClient->zcard(key);
             if (countResult && *countResult > mMaxCandles) {
-                co_await mClient->command({
+                // GCC 15 ICE workaround: explicit vector instead of brace-init
+                std::vector<std::string> trimArgs{
                     "ZREMRANGEBYRANK", key, "0", std::to_string(*countResult - mMaxCandles - 1)
-                });
+                };
+                co_await mClient->command(std::move(trimArgs));
             }
         }
 

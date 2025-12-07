@@ -47,7 +47,9 @@ task::Task<void, std::error_code> asyncMain(int argc, char *argv[]) {
 
     // Get baseline memory
     auto getRedisMemory = [&]() -> task::Task<int64_t, std::error_code> {
-        auto result = co_await redis.command({"INFO", "memory"});
+        // GCC 15 ICE workaround: explicit vector instead of brace-init
+        std::vector<std::string> infoArgs{"INFO", "memory"};
+        auto result = co_await redis.command(std::move(infoArgs));
         CO_EXPECT(result);
         auto info = std::get<std::string>(*result);
         auto pos = info.find("used_memory:");
@@ -73,7 +75,8 @@ task::Task<void, std::error_code> asyncMain(int argc, char *argv[]) {
     };
 
     // Flush all
-    co_await redis.command({"FLUSHALL"});
+    std::vector<std::string> flushArgs{"FLUSHALL"};
+    co_await redis.command(std::move(flushArgs));
     co_await sleep(std::chrono::milliseconds{100});
 
     auto redisBase = co_await getRedisMemory();
@@ -176,7 +179,8 @@ task::Task<void, std::error_code> asyncMain(int argc, char *argv[]) {
     std::cout << "  Memcached/Redis (Binary): " << (double)mcBinaryUsed/redisBinaryUsed << "x\n";
 
     // Cleanup
-    co_await redis.command({"DEL", "mem:binary:candles", "mem:json:candles"});
+    std::vector<std::string> delArgs{"DEL", "mem:binary:candles", "mem:json:candles"};
+    co_await redis.command(std::move(delArgs));
     co_await redis.disconnect();
     co_await mc.disconnect();
 
