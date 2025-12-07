@@ -20,6 +20,14 @@
       "dependencies": [
         "catch2"
       ]
+    },
+    "benchmarks": {
+      "description": "Build Benchmarks",
+      "dependencies": [
+        "benchmark",
+        "asio",
+        "drogon"
+      ]
     }
   }
 }
