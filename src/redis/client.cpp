@@ -492,7 +492,8 @@ task::Task<void, std::error_code> Client::setex(
 }
 
 task::Task<bool, std::error_code> Client::setnx(std::string_view key, std::string_view value) {
-    auto result = co_await mImpl->executeCommand({"SETNX", std::string(key), std::string(value)});
+    std::vector<std::string> args{"SETNX", std::string(key), std::string(value)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToInt(*result) == 1;
 }
@@ -525,25 +526,29 @@ Client::mset(std::span<const std::pair<std::string, std::string>> kvs) {
 }
 
 task::Task<std::int64_t, std::error_code> Client::incr(std::string_view key) {
-    auto result = co_await mImpl->executeCommand({"INCR", std::string(key)});
+    std::vector<std::string> args{"INCR", std::string(key)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToInt(*result);
 }
 
 task::Task<std::int64_t, std::error_code> Client::incrby(std::string_view key, std::int64_t delta) {
-    auto result = co_await mImpl->executeCommand({"INCRBY", std::string(key), std::to_string(delta)});
+    std::vector<std::string> args{"INCRBY", std::string(key), std::to_string(delta)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToInt(*result);
 }
 
 task::Task<std::int64_t, std::error_code> Client::decr(std::string_view key) {
-    auto result = co_await mImpl->executeCommand({"DECR", std::string(key)});
+    std::vector<std::string> args{"DECR", std::string(key)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToInt(*result);
 }
 
 task::Task<std::int64_t, std::error_code> Client::append(std::string_view key, std::string_view value) {
-    auto result = co_await mImpl->executeCommand({"APPEND", std::string(key), std::string(value)});
+    std::vector<std::string> args{"APPEND", std::string(key), std::string(value)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToInt(*result);
 }
@@ -563,7 +568,8 @@ task::Task<std::int64_t, std::error_code> Client::del(std::span<const std::strin
 }
 
 task::Task<bool, std::error_code> Client::del(std::string_view key) {
-    auto result = co_await mImpl->executeCommand({"DEL", std::string(key)});
+    std::vector<std::string> args{"DEL", std::string(key)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToInt(*result) == 1;
 }
@@ -581,48 +587,55 @@ task::Task<std::int64_t, std::error_code> Client::exists(std::span<const std::st
 }
 
 task::Task<bool, std::error_code> Client::exists(std::string_view key) {
-    auto result = co_await mImpl->executeCommand({"EXISTS", std::string(key)});
+    std::vector<std::string> args{"EXISTS", std::string(key)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToInt(*result) == 1;
 }
 
 task::Task<bool, std::error_code> Client::expire(std::string_view key, std::chrono::seconds seconds) {
-    auto result = co_await mImpl->executeCommand({"EXPIRE", std::string(key), std::to_string(seconds.count())});
+    std::vector<std::string> args{"EXPIRE", std::string(key), std::to_string(seconds.count())};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToInt(*result) == 1;
 }
 
 task::Task<bool, std::error_code> Client::pexpire(std::string_view key, std::chrono::milliseconds ms) {
-    auto result = co_await mImpl->executeCommand({"PEXPIRE", std::string(key), std::to_string(ms.count())});
+    std::vector<std::string> args{"PEXPIRE", std::string(key), std::to_string(ms.count())};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToInt(*result) == 1;
 }
 
 task::Task<std::int64_t, std::error_code> Client::ttl(std::string_view key) {
-    auto result = co_await mImpl->executeCommand({"TTL", std::string(key)});
+    std::vector<std::string> args{"TTL", std::string(key)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToInt(*result);
 }
 
 task::Task<std::int64_t, std::error_code> Client::pttl(std::string_view key) {
-    auto result = co_await mImpl->executeCommand({"PTTL", std::string(key)});
+    std::vector<std::string> args{"PTTL", std::string(key)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToInt(*result);
 }
 
 task::Task<std::vector<std::string>, std::error_code> Client::keys(std::string_view pattern) {
-    auto result = co_await mImpl->executeCommand({"KEYS", std::string(pattern)});
+    std::vector<std::string> args{"KEYS", std::string(pattern)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToStringVector(*result);
 }
 
 task::Task<ScanResult<std::string>, std::error_code>
 Client::scan(std::string_view cursor, std::string_view pattern, std::size_t count) {
-    auto result = co_await mImpl->executeCommand({
+    std::vector<std::string> args{
         "SCAN", std::string(cursor),
         "MATCH", std::string(pattern),
         "COUNT", std::to_string(count)
-    });
+    };
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
 
     ScanResult<std::string> scanResult;
@@ -637,13 +650,15 @@ Client::scan(std::string_view cursor, std::string_view pattern, std::size_t coun
 }
 
 task::Task<std::string, std::error_code> Client::type(std::string_view key) {
-    auto result = co_await mImpl->executeCommand({"TYPE", std::string(key)});
+    std::vector<std::string> args{"TYPE", std::string(key)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToString(*result).value_or("none");
 }
 
 task::Task<void, std::error_code> Client::rename(std::string_view key, std::string_view newKey) {
-    auto result = co_await mImpl->executeCommand({"RENAME", std::string(key), std::string(newKey)});
+    std::vector<std::string> args{"RENAME", std::string(key), std::string(newKey)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return {};
 }
@@ -651,7 +666,8 @@ task::Task<void, std::error_code> Client::rename(std::string_view key, std::stri
 // ==================== Hash Commands ====================
 
 task::Task<OptionalString, std::error_code> Client::hget(std::string_view key, std::string_view field) {
-    auto result = co_await mImpl->executeCommand({"HGET", std::string(key), std::string(field)});
+    std::vector<std::string> args{"HGET", std::string(key), std::string(field)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToString(*result);
 }
@@ -672,7 +688,8 @@ Client::hset(std::string_view key, std::span<const std::pair<std::string, std::s
 
 task::Task<bool, std::error_code>
 Client::hset(std::string_view key, std::string_view field, std::string_view value) {
-    auto result = co_await mImpl->executeCommand({"HSET", std::string(key), std::string(field), std::string(value)});
+    std::vector<std::string> args{"HSET", std::string(key), std::string(field), std::string(value)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToInt(*result) == 1;
 }
@@ -692,7 +709,8 @@ Client::hmget(std::string_view key, std::span<const std::string> fields) {
 
 task::Task<std::vector<std::pair<std::string, std::string>>, std::error_code>
 Client::hgetall(std::string_view key) {
-    auto result = co_await mImpl->executeCommand({"HGETALL", std::string(key)});
+    std::vector<std::string> args{"HGETALL", std::string(key)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
 
     std::vector<std::pair<std::string, std::string>> pairs;
@@ -724,20 +742,23 @@ Client::hdel(std::string_view key, std::span<const std::string> fields) {
 }
 
 task::Task<bool, std::error_code> Client::hexists(std::string_view key, std::string_view field) {
-    auto result = co_await mImpl->executeCommand({"HEXISTS", std::string(key), std::string(field)});
+    std::vector<std::string> args{"HEXISTS", std::string(key), std::string(field)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToInt(*result) == 1;
 }
 
 task::Task<std::int64_t, std::error_code> Client::hlen(std::string_view key) {
-    auto result = co_await mImpl->executeCommand({"HLEN", std::string(key)});
+    std::vector<std::string> args{"HLEN", std::string(key)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToInt(*result);
 }
 
 task::Task<std::int64_t, std::error_code>
 Client::hincrby(std::string_view key, std::string_view field, std::int64_t delta) {
-    auto result = co_await mImpl->executeCommand({"HINCRBY", std::string(key), std::string(field), std::to_string(delta)});
+    std::vector<std::string> args{"HINCRBY", std::string(key), std::string(field), std::to_string(delta)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToInt(*result);
 }
@@ -771,26 +792,30 @@ Client::rpush(std::string_view key, std::span<const std::string> elements) {
 }
 
 task::Task<OptionalString, std::error_code> Client::lpop(std::string_view key) {
-    auto result = co_await mImpl->executeCommand({"LPOP", std::string(key)});
+    std::vector<std::string> args{"LPOP", std::string(key)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToString(*result);
 }
 
 task::Task<OptionalString, std::error_code> Client::rpop(std::string_view key) {
-    auto result = co_await mImpl->executeCommand({"RPOP", std::string(key)});
+    std::vector<std::string> args{"RPOP", std::string(key)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToString(*result);
 }
 
 task::Task<std::vector<std::string>, std::error_code>
 Client::lrange(std::string_view key, std::int64_t start, std::int64_t stop) {
-    auto result = co_await mImpl->executeCommand({"LRANGE", std::string(key), std::to_string(start), std::to_string(stop)});
+    std::vector<std::string> args{"LRANGE", std::string(key), std::to_string(start), std::to_string(stop)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToStringVector(*result);
 }
 
 task::Task<std::int64_t, std::error_code> Client::llen(std::string_view key) {
-    auto result = co_await mImpl->executeCommand({"LLEN", std::string(key)});
+    std::vector<std::string> args{"LLEN", std::string(key)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToInt(*result);
 }
@@ -882,19 +907,22 @@ Client::srem(std::string_view key, std::span<const std::string> members) {
 }
 
 task::Task<std::vector<std::string>, std::error_code> Client::smembers(std::string_view key) {
-    auto result = co_await mImpl->executeCommand({"SMEMBERS", std::string(key)});
+    std::vector<std::string> args{"SMEMBERS", std::string(key)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToStringVector(*result);
 }
 
 task::Task<bool, std::error_code> Client::sismember(std::string_view key, std::string_view member) {
-    auto result = co_await mImpl->executeCommand({"SISMEMBER", std::string(key), std::string(member)});
+    std::vector<std::string> args{"SISMEMBER", std::string(key), std::string(member)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToInt(*result) == 1;
 }
 
 task::Task<std::int64_t, std::error_code> Client::scard(std::string_view key) {
-    auto result = co_await mImpl->executeCommand({"SCARD", std::string(key)});
+    std::vector<std::string> args{"SCARD", std::string(key)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToInt(*result);
 }
@@ -924,14 +952,16 @@ Client::zadd(std::string_view key, std::span<const std::pair<double, std::string
 
 task::Task<std::vector<std::string>, std::error_code>
 Client::zrange(std::string_view key, std::int64_t start, std::int64_t stop) {
-    auto result = co_await mImpl->executeCommand({"ZRANGE", std::string(key), std::to_string(start), std::to_string(stop)});
+    std::vector<std::string> args{"ZRANGE", std::string(key), std::to_string(start), std::to_string(stop)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToStringVector(*result);
 }
 
 task::Task<std::vector<std::pair<std::string, double>>, std::error_code>
 Client::zrangeWithScores(std::string_view key, std::int64_t start, std::int64_t stop) {
-    auto result = co_await mImpl->executeCommand({"ZRANGE", std::string(key), std::to_string(start), std::to_string(stop), "WITHSCORES"});
+    std::vector<std::string> args{"ZRANGE", std::string(key), std::to_string(start), std::to_string(stop), "WITHSCORES"};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
 
     std::vector<std::pair<std::string, double>> pairs;
@@ -952,7 +982,8 @@ Client::zrangeWithScores(std::string_view key, std::int64_t start, std::int64_t 
 
 task::Task<std::optional<std::int64_t>, std::error_code>
 Client::zrank(std::string_view key, std::string_view member) {
-    auto result = co_await mImpl->executeCommand({"ZRANK", std::string(key), std::string(member)});
+    std::vector<std::string> args{"ZRANK", std::string(key), std::string(member)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
 
     if (std::holds_alternative<Nil>(*result)) {
@@ -963,7 +994,8 @@ Client::zrank(std::string_view key, std::string_view member) {
 
 task::Task<std::optional<double>, std::error_code>
 Client::zscore(std::string_view key, std::string_view member) {
-    auto result = co_await mImpl->executeCommand({"ZSCORE", std::string(key), std::string(member)});
+    std::vector<std::string> args{"ZSCORE", std::string(key), std::string(member)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
 
     if (std::holds_alternative<Nil>(*result)) {
@@ -982,7 +1014,8 @@ Client::zscore(std::string_view key, std::string_view member) {
 }
 
 task::Task<std::int64_t, std::error_code> Client::zcard(std::string_view key) {
-    auto result = co_await mImpl->executeCommand({"ZCARD", std::string(key)});
+    std::vector<std::string> args{"ZCARD", std::string(key)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToInt(*result);
 }
@@ -1004,7 +1037,8 @@ Client::zrem(std::string_view key, std::span<const std::string> members) {
 
 task::Task<std::int64_t, std::error_code>
 Client::publish(std::string_view channel, std::string_view message) {
-    auto result = co_await mImpl->executeCommand({"PUBLISH", std::string(channel), std::string(message)});
+    std::vector<std::string> args{"PUBLISH", std::string(channel), std::string(message)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToInt(*result);
 }
@@ -1074,7 +1108,8 @@ task::Task<std::string, std::error_code> Client::ping(std::string_view message) 
 }
 
 task::Task<std::string, std::error_code> Client::echo(std::string_view message) {
-    auto result = co_await mImpl->executeCommand({"ECHO", std::string(message)});
+    std::vector<std::string> args{"ECHO", std::string(message)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToString(*result).value_or("");
 }
@@ -1091,7 +1126,8 @@ task::Task<std::string, std::error_code> Client::info(std::string_view section) 
 }
 
 task::Task<std::int64_t, std::error_code> Client::dbsize() {
-    auto result = co_await mImpl->executeCommand({"DBSIZE"});
+    std::vector<std::string> args{"DBSIZE"};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return valueToInt(*result);
 }
@@ -1119,7 +1155,8 @@ task::Task<void, std::error_code> Client::flushall(bool async) {
 }
 
 task::Task<void, std::error_code> Client::select(int database) {
-    auto result = co_await mImpl->executeCommand({"SELECT", std::to_string(database)});
+    std::vector<std::string> args{"SELECT", std::to_string(database)};
+    auto result = co_await mImpl->executeCommand(std::move(args));
     CO_EXPECT(result);
     co_return {};
 }
