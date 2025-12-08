@@ -28,14 +28,14 @@ ASYNC_TEST_CASE("file", "[fs]") {
         std::vector<std::byte> data;
         data.resize(content.size());
 
-        REQUIRE(co_await file->read(data) == content.size());
+        REQUIRE_EQ(co_await file->read(data), content.size());
         REQUIRE(data == content);
-        REQUIRE(co_await file->read(data) == 0);
+        REQUIRE_EQ(co_await file->read(data), 0);
     }
 
     SECTION("write") {
-        REQUIRE(co_await file->write(content) == content.size());
-        REQUIRE(co_await asyncio::fs::read(path) == content);
+        REQUIRE_EQ(co_await file->write(content), content.size());
+        REQUIRE_EQ(co_await asyncio::fs::read(path), content);
     }
 
     SECTION("close") {
@@ -58,7 +58,7 @@ ASYNC_TEST_CASE("open file", "[fs]") {
         auto file = co_await asyncio::fs::open(path, O_RDONLY);
         REQUIRE(file);
 
-        REQUIRE(co_await file->readAll() == input);
+        REQUIRE_EQ(co_await file->readAll(), input);
 
         REQUIRE_FALSE(co_await file->writeAll(input));
         REQUIRE(co_await asyncio::fs::remove(path));
@@ -71,7 +71,7 @@ ASYNC_TEST_CASE("open file", "[fs]") {
         REQUIRE(file);
 
         REQUIRE(co_await file->writeAll(input));
-        REQUIRE(co_await asyncio::fs::read(path) == input);
+        REQUIRE_EQ(co_await asyncio::fs::read(path), input);
 
         REQUIRE_FALSE(co_await file->readAll());
         REQUIRE(co_await asyncio::fs::remove(path));
@@ -85,7 +85,7 @@ ASYNC_TEST_CASE("open file", "[fs]") {
 
         REQUIRE(co_await file->writeAll(input));
         REQUIRE(co_await file->rewind());
-        REQUIRE(co_await file->readAll() == input);
+        REQUIRE_EQ(co_await file->readAll(), input);
 
         REQUIRE(co_await asyncio::fs::remove(path));
     }
@@ -96,9 +96,9 @@ ASYNC_TEST_CASE("open file", "[fs]") {
         auto file = co_await asyncio::fs::open(path, O_WRONLY | O_APPEND);
         REQUIRE(file);
 
-        REQUIRE(co_await file->position() == 0);
+        REQUIRE_EQ(co_await file->position(), 0);
         REQUIRE(co_await file->writeAll(input));
-        REQUIRE(co_await file->position() == input.size() * 2);
+        REQUIRE_EQ(co_await file->position(), input.size() * 2);
 
         const auto content = co_await asyncio::fs::read(path);
         REQUIRE(content);
@@ -162,38 +162,38 @@ ASYNC_TEST_CASE("seekable file", "[fs]") {
     REQUIRE(file);
 
     SECTION("position") {
-        REQUIRE(co_await file->position() == 0);
+        REQUIRE_EQ(co_await file->position(), 0);
         REQUIRE(co_await file->readAll());
-        REQUIRE(co_await file->position() == content.size());
+        REQUIRE_EQ(co_await file->position(), content.size());
     }
 
     SECTION("length") {
-        REQUIRE(co_await file->length() == content.size());
+        REQUIRE_EQ(co_await file->length(), content.size());
     }
 
     SECTION("rewind") {
         REQUIRE(co_await file->readAll());
-        REQUIRE(co_await file->position() == content.size());
+        REQUIRE_EQ(co_await file->position(), content.size());
         REQUIRE(co_await file->rewind());
-        REQUIRE(co_await file->position() == 0);
+        REQUIRE_EQ(co_await file->position(), 0);
     }
 
     SECTION("seek") {
         const auto offset = GENERATE_REF(take(1, random<std::size_t>(0, content.size() - 1)));
 
         SECTION("begin") {
-            REQUIRE(co_await file->seek(offset, asyncio::ISeekable::Whence::BEGIN) == offset);
+            REQUIRE_EQ(co_await file->seek(offset, asyncio::ISeekable::Whence::BEGIN), offset);
         }
 
         SECTION("current") {
-            REQUIRE(co_await file->seek(offset, asyncio::ISeekable::Whence::CURRENT) == offset);
+            REQUIRE_EQ(co_await file->seek(offset, asyncio::ISeekable::Whence::CURRENT), offset);
         }
 
         SECTION("end") {
-            REQUIRE(co_await file->seek(
+            REQUIRE_EQ(co_await file->seek(
                 -(static_cast<std::int64_t>(content.size() - offset)),
                 asyncio::ISeekable::Whence::END
-            ) == offset);
+            ), offset);
         }
 
         const auto data = co_await file->readAll();
@@ -217,7 +217,7 @@ ASYNC_TEST_CASE("read bytes from file", "[fs]") {
     SECTION("file exists") {
         const auto content = GENERATE(take(1, randomBytes(1, 102400)));
         REQUIRE(co_await asyncio::fs::write(path, content));
-        REQUIRE(co_await asyncio::fs::read(path) == content);
+        REQUIRE_EQ(co_await asyncio::fs::read(path), content);
         REQUIRE(co_await asyncio::fs::remove(path));
     }
 }
@@ -235,7 +235,7 @@ ASYNC_TEST_CASE("read string from file", "[fs]") {
     SECTION("file exists") {
         const auto content = GENERATE(take(1, randomString(1, 102400)));
         REQUIRE(co_await asyncio::fs::write(path, content));
-        REQUIRE(co_await asyncio::fs::readString(path) == content);
+        REQUIRE_EQ(co_await asyncio::fs::readString(path), content);
         REQUIRE(co_await asyncio::fs::remove(path));
     }
 }
@@ -248,7 +248,7 @@ ASYNC_TEST_CASE("write bytes to file", "[fs]") {
     const auto content = GENERATE(take(1, randomBytes(1, 102400)));
 
     REQUIRE(co_await asyncio::fs::write(path, content));
-    REQUIRE(co_await asyncio::fs::read(path) == content);
+    REQUIRE_EQ(co_await asyncio::fs::read(path), content);
     REQUIRE(co_await asyncio::fs::remove(path));
 }
 
@@ -260,7 +260,7 @@ ASYNC_TEST_CASE("write string to file", "[fs]") {
     const auto content = GENERATE(take(1, randomString(1, 102400)));
 
     REQUIRE(co_await asyncio::fs::write(path, content));
-    REQUIRE(co_await asyncio::fs::readString(path) == content);
+    REQUIRE_EQ(co_await asyncio::fs::readString(path), content);
     REQUIRE(co_await asyncio::fs::remove(path));
 }
 

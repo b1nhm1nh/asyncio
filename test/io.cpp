@@ -6,7 +6,7 @@ ASYNC_TEST_CASE("copy", "[io]") {
 
     asyncio::BytesReader reader{input};
     asyncio::BytesWriter writer;
-    REQUIRE(co_await asyncio::copy(reader, writer) == input.size());
+    REQUIRE_EQ(co_await asyncio::copy(reader, writer), input.size());
     REQUIRE(*writer == input);
 }
 
@@ -14,7 +14,7 @@ ASYNC_TEST_CASE("read all", "[io]") {
     const auto input = GENERATE(take(10, randomBytes(1, 102400)));
 
     asyncio::BytesReader reader{input};
-    REQUIRE(co_await reader.readAll() == input);
+    REQUIRE_EQ(co_await reader.readAll(), input);
 }
 
 ASYNC_TEST_CASE("read exactly", "[io]") {
@@ -48,10 +48,10 @@ ASYNC_TEST_CASE("string reader", "[io]") {
     std::string message;
     message.resize(input.size());
 
-    REQUIRE(co_await reader.read(std::as_writable_bytes(std::span{message})) == input.size());
+    REQUIRE_EQ(co_await reader.read(std::as_writable_bytes(std::span{message})), input.size());
     REQUIRE(message == input);
 
-    REQUIRE(co_await reader.read(std::as_writable_bytes(std::span{message})) == 0);
+    REQUIRE_EQ(co_await reader.read(std::as_writable_bytes(std::span{message})), 0);
 }
 
 ASYNC_TEST_CASE("string writer", "[io]") {
@@ -71,10 +71,10 @@ ASYNC_TEST_CASE("bytes reader", "[io]") {
     std::vector<std::byte> data;
     data.resize(input.size());
 
-    REQUIRE(co_await reader.read(data) == input.size());
+    REQUIRE_EQ(co_await reader.read(data), input.size());
     REQUIRE(data == input);
 
-    REQUIRE(co_await reader.read(data) == 0);
+    REQUIRE_EQ(co_await reader.read(data), 0);
 }
 
 ASYNC_TEST_CASE("bytes writer", "[io]") {

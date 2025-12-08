@@ -89,6 +89,16 @@ struct Catch::StringMaker<T> {
     }
 };
 
+// Workaround for GCC 15 bug: std::expected::operator== constraint satisfaction
+// becomes recursive when combined with Catch2's expression decomposition.
+// This macro unwraps the expected value before comparison.
+#define INTERNAL_REQUIRE_EQ(var, expr, expected_val)    \
+    const auto var = expr;                              \
+    REQUIRE(var);                                       \
+    REQUIRE(*(var) == (expected_val))
+
+#define REQUIRE_EQ(expr, expected_val) INTERNAL_REQUIRE_EQ(INTERNAL_CATCH_UNIQUE_NAME(_result), expr, expected_val)
+
 #define INTERNAL_REQUIRE_ERROR(var, expr, err)  \
     const auto var = expr;                      \
     REQUIRE_FALSE(var);                         \
