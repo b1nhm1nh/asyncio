@@ -20,7 +20,7 @@ ASYNC_TEST_CASE("buffer reader", "[buffer]") {
 
         SECTION("not empty") {
             std::vector<std::byte> data;
-            REQUIRE(co_await reader.read(data) == 0);
+            REQUIRE_EQ(co_await reader.read(data), 0);
             REQUIRE(reader.available() == (std::min)(input.size(), capacity));
         }
     }
@@ -35,7 +35,7 @@ ASYNC_TEST_CASE("buffer reader", "[buffer]") {
             data.resize(size);
 
             const auto n = co_await reader.read(data);
-            REQUIRE(n == (std::min)(size, input.size()));
+            REQUIRE_EQ(n, (std::min)(size, input.size()));
 
             data.resize(*n);
             REQUIRE_THAT(data, Catch::Matchers::RangeEquals(std::span{input.data(), *n}));
@@ -44,7 +44,7 @@ ASYNC_TEST_CASE("buffer reader", "[buffer]") {
         SECTION("eof") {
             REQUIRE(co_await reader.readAll());
             std::array<std::byte, 64> data{};
-            REQUIRE(co_await reader.read(data) == 0);
+            REQUIRE_EQ(co_await reader.read(data), 0);
         }
     }
 
@@ -88,7 +88,7 @@ ASYNC_TEST_CASE("buffer reader", "[buffer]") {
             }
 
             asyncio::BufReader reader{asyncio::StringReader{inputString}, capacity};
-            REQUIRE(co_await reader.readLine() == inputString.substr(0, pos));
+            REQUIRE_EQ(co_await reader.readLine(), inputString.substr(0, pos));
         }
 
         SECTION("unexpected eof") {
@@ -141,7 +141,7 @@ ASYNC_TEST_CASE("buffer writer", "[buffer]") {
     }
 
     SECTION("write") {
-        REQUIRE(co_await writer.write(input) == input.size());
+        REQUIRE_EQ(co_await writer.write(input), input.size());
         REQUIRE(writer.pending() > 0);
     }
 

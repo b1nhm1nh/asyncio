@@ -75,7 +75,7 @@ ASYNC_TEST_CASE("post cancellable task to a new thread", "[thread]") {
         );
 
         SECTION("normal") {
-            REQUIRE(co_await task == 1024);
+            REQUIRE_EQ(co_await task, 1024);
             REQUIRE(std::chrono::system_clock::now() - tp > 45ms);
         }
 
@@ -106,7 +106,7 @@ ASYNC_TEST_CASE("post task to thread pool", "[thread]") {
                 std::this_thread::sleep_for(50ms);
                 return 1024;
             });
-            REQUIRE(result == 1024);
+            REQUIRE_EQ(result, 1024);
             REQUIRE(std::chrono::system_clock::now() - tp > 45ms);
         }
     }
@@ -207,7 +207,7 @@ ASYNC_TEST_CASE("post cancellable task to thread pool", "[thread]") {
         REQUIRE(events[0].wait());
 
         SECTION("normal") {
-            REQUIRE(co_await task == 1024);
+            REQUIRE_EQ(co_await task, 1024);
             REQUIRE(std::chrono::system_clock::now() - tp > 45ms);
         }
 
