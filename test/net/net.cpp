@@ -245,13 +245,13 @@ ASYNC_TEST_CASE("copy bidirectional", "[net]") {
 
     REQUIRE(co_await stream1.writeAll(input));
     REQUIRE(co_await stream1.shutdown());
-    REQUIRE(co_await task1 == input);
+    REQUIRE_EQ(co_await task1, input);
 
     auto task2 = stream1.readAll();
 
     REQUIRE(co_await stream2.writeAll(input));
     REQUIRE(co_await stream2.shutdown());
-    REQUIRE(co_await task2 == input);
+    REQUIRE_EQ(co_await task2, input);
 
     const auto result = co_await task;
     REQUIRE(result);

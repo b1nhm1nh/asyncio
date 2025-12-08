@@ -72,7 +72,7 @@ ASYNC_TEST_CASE("TCP stream", "[net::tcp]") {
         REQUIRE(co_await client.shutdown());
 
         std::array<std::byte, 1024> data{};
-        REQUIRE(co_await server.read(data) == 0);
+        REQUIRE_EQ(co_await server.read(data), 0);
     }
 
     SECTION("close reset") {
@@ -86,7 +86,7 @@ ASYNC_TEST_CASE("TCP stream", "[net::tcp]") {
         REQUIRE(co_await client.close());
 
         std::array<std::byte, 1024> data{};
-        REQUIRE(co_await server.read(data) == 0);
+        REQUIRE_EQ(co_await server.read(data), 0);
     }
 }
 
@@ -151,7 +151,7 @@ ASYNC_TEST_CASE("named pipe stream", "[net]") {
         REQUIRE(co_await client.close());
 
         std::array<std::byte, 1024> data{};
-        REQUIRE(co_await server.read(data) == 0);
+        REQUIRE_EQ(co_await server.read(data), 0);
     }
 }
 #endif
@@ -234,7 +234,7 @@ ASYNC_TEST_CASE("UNIX domain stream", "[net]") {
         REQUIRE(co_await client.close());
 
         std::array<std::byte, 1024> data{};
-        REQUIRE(co_await server.read(data) == 0);
+        REQUIRE_EQ(co_await server.read(data), 0);
     }
 }
 #endif
@@ -316,7 +316,7 @@ ASYNC_TEST_CASE("abstract UNIX domain stream", "[net]") {
         REQUIRE(co_await client.close());
 
         std::array<std::byte, 1024> data{};
-        REQUIRE(co_await server.read(data) == 0);
+        REQUIRE_EQ(co_await server.read(data), 0);
     }
 }
 #endif

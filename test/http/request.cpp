@@ -104,12 +104,12 @@ ASYNC_TEST_CASE("requests", "[http::request]") {
         }
 
         SECTION("string") {
-            REQUIRE(co_await response->string() == "hello world");
+            REQUIRE_EQ(co_await response->string(), "hello world");
         }
 
         SECTION("output") {
             REQUIRE(co_await response->output(path));
-            REQUIRE(co_await asyncio::fs::readString(path) == "hello world");
+            REQUIRE_EQ(co_await asyncio::fs::readString(path), "hello world");
             REQUIRE(co_await asyncio::fs::remove(path));
         }
 

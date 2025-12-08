@@ -265,6 +265,6 @@ ASYNC_TEST_CASE("message deflate", "[http::websocket]") {
 
         const auto compressed = co_await compressor->compress(input);
         REQUIRE(compressed);
-        REQUIRE(co_await decompressor->decompress(*compressed) == input);
+        REQUIRE_EQ(co_await decompressor->decompress(*compressed), input);
     }
 }

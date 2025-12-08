@@ -10,7 +10,7 @@ TEST_CASE("event loop", "[event loop]") {
                 REQUIRE(co_await asyncio::sleep(10ms));
                 co_return 1024;
             });
-            REQUIRE(result == 1024);
+            REQUIRE_EQ(result, 1024);
         }
 
         SECTION("failure") {
@@ -31,7 +31,7 @@ TEST_CASE("event loop", "[event loop]") {
                 REQUIRE(co_await asyncio::sleep(10ms));
                 co_return 1024;
             });
-            REQUIRE(result == 1024);
+            REQUIRE_EQ(result, 1024);
         }
 
         SECTION("failure") {

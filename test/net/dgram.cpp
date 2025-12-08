@@ -33,12 +33,12 @@ ASYNC_TEST_CASE("UDP socket", "[net::dgram]") {
         const auto destination = socket->localAddress();
         REQUIRE(destination);
 
-        REQUIRE(co_await peer->writeTo(input, *destination) == input.size());
+        REQUIRE_EQ(co_await peer->writeTo(input, *destination), input.size());
 
         std::vector<std::byte> data;
         data.resize(input.size());
 
-        REQUIRE(co_await socket->read(data) == input.size());
+        REQUIRE_EQ(co_await socket->read(data), input.size());
         REQUIRE(data == input);
     }
 
@@ -53,7 +53,7 @@ ASYNC_TEST_CASE("UDP socket", "[net::dgram]") {
         const auto destination = socket->localAddress();
         REQUIRE(destination);
 
-        REQUIRE(co_await peer->writeTo(input, *destination) == input.size());
+        REQUIRE_EQ(co_await peer->writeTo(input, *destination), input.size());
 
         std::vector<std::byte> data;
         data.resize(input.size());
@@ -75,7 +75,7 @@ ASYNC_TEST_CASE("UDP socket", "[net::dgram]") {
         const auto destination = peer->localAddress();
         REQUIRE(destination);
 
-        REQUIRE(co_await socket->writeTo(input, *destination) == input.size());
+        REQUIRE_EQ(co_await socket->writeTo(input, *destination), input.size());
 
         std::vector<std::byte> data;
         data.resize(input.size());
@@ -112,7 +112,7 @@ ASYNC_TEST_CASE("UDP socket connect", "[net]") {
     SECTION("write") {
         const auto input = GENERATE(take(1, randomBytes(1, 1024)));
 
-        REQUIRE(co_await socket->write(input) == input.size());
+        REQUIRE_EQ(co_await socket->write(input), input.size());
 
         std::vector<std::byte> data;
         data.resize(input.size());

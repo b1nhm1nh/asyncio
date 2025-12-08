@@ -200,7 +200,7 @@ ASYNC_TEST_CASE("tls stream", "[net::tls]") {
             auto task = client.shutdown();
 
             std::array<std::byte, 1024> data{};
-            REQUIRE(co_await server.read(data) == 0);
+            REQUIRE_EQ(co_await server.read(data), 0);
             REQUIRE(co_await task);
         }
 
@@ -219,7 +219,7 @@ ASYNC_TEST_CASE("tls stream", "[net::tls]") {
             auto task = server.shutdown();
 
             std::array<std::byte, 1024> data{};
-            REQUIRE(co_await client.read(data) == 0);
+            REQUIRE_EQ(co_await client.read(data), 0);
             REQUIRE(co_await task);
         }
     }
@@ -228,7 +228,7 @@ ASYNC_TEST_CASE("tls stream", "[net::tls]") {
         auto task = client.close();
 
         std::array<std::byte, 1024> data{};
-        REQUIRE(co_await server.read(data) == 0);
+        REQUIRE_EQ(co_await server.read(data), 0);
         REQUIRE(co_await server.shutdown());
         REQUIRE(co_await task);
     }

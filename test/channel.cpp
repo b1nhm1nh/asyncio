@@ -150,7 +150,7 @@ ASYNC_TEST_CASE("channel sender", "[channel]") {
                 auto task = asyncio::toThread([&] {
                     return sender.sendSync(element);
                 });
-                REQUIRE(co_await receiver.receive() == element);
+                REQUIRE_EQ(co_await receiver.receive(), element);
                 REQUIRE(co_await task);
             }
 
@@ -166,7 +166,7 @@ ASYNC_TEST_CASE("channel sender", "[channel]") {
                 });
 
                 REQUIRE(co_await asyncio::sleep(10ms));
-                REQUIRE(co_await receiver.receive() == element);
+                REQUIRE_EQ(co_await receiver.receive(), element);
                 REQUIRE(co_await task);
             }
         }
@@ -201,7 +201,7 @@ ASYNC_TEST_CASE("channel sender", "[channel]") {
                 auto task = asyncio::toThread([&] {
                     return sender.sendSyncEx(std::string{element});
                 });
-                REQUIRE(co_await receiver.receive() == element);
+                REQUIRE_EQ(co_await receiver.receive(), element);
                 REQUIRE(co_await task);
             }
 
@@ -217,7 +217,7 @@ ASYNC_TEST_CASE("channel sender", "[channel]") {
                 });
 
                 REQUIRE(co_await asyncio::sleep(10ms));
-                REQUIRE(co_await receiver.receive() == element);
+                REQUIRE_EQ(co_await receiver.receive(), element);
                 REQUIRE(co_await task);
             }
         }
@@ -257,7 +257,7 @@ ASYNC_TEST_CASE("channel sender", "[channel]") {
                 }
 
                 auto task = sender.send(element);
-                REQUIRE(co_await receiver.receive() == element);
+                REQUIRE_EQ(co_await receiver.receive(), element);
                 REQUIRE(co_await task);
             }
         }
@@ -292,7 +292,7 @@ ASYNC_TEST_CASE("channel sender", "[channel]") {
                 }
 
                 auto task = sender.sendEx(std::string{element});
-                REQUIRE(co_await receiver.receive() == element);
+                REQUIRE_EQ(co_await receiver.receive(), element);
                 REQUIRE(co_await task);
             }
         }
@@ -429,7 +429,7 @@ ASYNC_TEST_CASE("channel receiver", "[channel]") {
                     sender.close();
                 }
 
-                REQUIRE(co_await task == element);
+                REQUIRE_EQ(co_await task, element);
             }
 
             SECTION("wait with timeout") {
@@ -445,7 +445,7 @@ ASYNC_TEST_CASE("channel receiver", "[channel]") {
                     sender.close();
                 }
 
-                REQUIRE(co_await task == element);
+                REQUIRE_EQ(co_await task, element);
             }
         }
 
@@ -479,7 +479,7 @@ ASYNC_TEST_CASE("channel receiver", "[channel]") {
                     sender.close();
                 }
 
-                REQUIRE(co_await receiver.receive() == element);
+                REQUIRE_EQ(co_await receiver.receive(), element);
             }
 
             SECTION("wait") {
@@ -490,7 +490,7 @@ ASYNC_TEST_CASE("channel receiver", "[channel]") {
                     sender.close();
                 }
 
-                REQUIRE(co_await task == element);
+                REQUIRE_EQ(co_await task, element);
             }
         }
 
@@ -579,7 +579,7 @@ ASYNC_TEST_CASE("channel receiver dropped", "[channel]") {
     );
 
     REQUIRE(sender.trySend(element));
-    REQUIRE(co_await task == element);
+    REQUIRE_EQ(co_await task, element);
     REQUIRE(sender.closed());
 }
 
@@ -595,7 +595,7 @@ ASYNC_TEST_CASE("channel sender dropped", "[channel]") {
         }
     );
 
-    REQUIRE(co_await receiver.receive() == element);
+    REQUIRE_EQ(co_await receiver.receive(), element);
     REQUIRE(co_await task);
     REQUIRE(receiver.closed());
 }

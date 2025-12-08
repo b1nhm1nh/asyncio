@@ -15,7 +15,7 @@ ASYNC_TEMPLATE_TEST_CASE(
         REQUIRE(co_await asyncio::binary::writeLE(writer, input));
 
         asyncio::BytesReader reader{*std::move(writer)};
-        REQUIRE(co_await asyncio::binary::readLE<TestType>(reader) == input);
+        REQUIRE_EQ(co_await asyncio::binary::readLE<TestType>(reader), input);
     }
 
     SECTION("big endian") {
@@ -23,6 +23,6 @@ ASYNC_TEMPLATE_TEST_CASE(
         REQUIRE(co_await asyncio::binary::writeBE(writer, input));
 
         asyncio::BytesReader reader{*std::move(writer)};
-        REQUIRE(co_await asyncio::binary::readBE<TestType>(reader) == input);
+        REQUIRE_EQ(co_await asyncio::binary::readBE<TestType>(reader), input);
     }
 }
